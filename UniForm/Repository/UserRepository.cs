@@ -11,11 +11,13 @@ namespace UniForm.Repository
 
         public readonly DataContext _context;
         private readonly ILogger<UserRepository> _logger;
+        private readonly ITokenRepository _tokenRepository;
 
-        public UserRepository(DataContext context, ILogger<UserRepository> logger)
+        public UserRepository(DataContext context, ILogger<UserRepository> logger, ITokenRepository tokenRepository)
         {
-            _context = context;
-            _logger = logger;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _tokenRepository = tokenRepository ?? throw new ArgumentNullException(nameof(tokenRepository));
         }
 
         public async Task<ApiResponse<UserDto>> GetUserById(int userId)
@@ -31,7 +33,7 @@ namespace UniForm.Repository
                     return new ApiResponse<UserDto>
                     {
                         Data = null,
-                        Succes = false,
+                        IsSuccessful = false,
                     };
                 }
 
@@ -50,7 +52,7 @@ namespace UniForm.Repository
                 return new ApiResponse<UserDto>
                 {
                     Data = response,
-                    Succes = true,
+                    IsSuccessful = true,
                 };
             }
             catch (Exception ex)
@@ -59,7 +61,7 @@ namespace UniForm.Repository
                 return new ApiResponse<UserDto>
                 {
                     Data = null,
-                    Succes = false,
+                    IsSuccessful = false,
                     Message = $"Error: {ex.Message}"
                 };
             }
@@ -78,8 +80,15 @@ namespace UniForm.Repository
                     return new ApiResponse<UserDto>
                     {
                         Data = null,
-                        Succes = false,
+                        IsSuccessful = false,
                     };
+                }
+
+                var token = await _tokenRepository.CreateTokenAsync(user.Id);
+                
+                if (token == null || string.IsNullOrEmpty(token.Data))
+                {
+                    throw new Exception("Could not create a valid token.");
                 }
 
                 var userDto = new UserDto
@@ -89,7 +98,8 @@ namespace UniForm.Repository
                     Email = user.Email,
                     CreateDate = user.CreateDate,
                     RecordStatus = user.RecordStatus,
-                    UpdateDate = user.UpdateDate
+                    UpdateDate = user.UpdateDate,
+                    AccessToken = token.Data
                 };
 
                 _logger.LogInformation("Kullanıcı giriş yaptı. UserId: {UserId}, Email: {Email}", user.Id, user.Email);
@@ -97,7 +107,7 @@ namespace UniForm.Repository
                 return new ApiResponse<UserDto>
                 {
                     Data = userDto,
-                    Succes = true,
+                    IsSuccessful = true,
                 };
             }
             catch (Exception ex)
@@ -106,7 +116,7 @@ namespace UniForm.Repository
                 return new ApiResponse<UserDto>
                 {
                     Data = null,
-                    Succes = false,
+                    IsSuccessful = false,
                     Message = $"Error: {ex.Message}"
                 };
             }
@@ -125,7 +135,7 @@ namespace UniForm.Repository
                     return new ApiResponse<User>
                     {
                         Data = null,
-                        Succes = false,
+                        IsSuccessful = false,
                     };
                 }
 
@@ -145,7 +155,7 @@ namespace UniForm.Repository
                 return new ApiResponse<User>
                 {
                     Data = userInfo,
-                    Succes = true,
+                    IsSuccessful = true,
                 };
             }
             catch (Exception ex)
@@ -154,7 +164,7 @@ namespace UniForm.Repository
                 return new ApiResponse<User>
                 {
                     Data = null,
-                    Succes = false,
+                    IsSuccessful = false,
                     Message = $"Error: {ex.Message}"
                 };
             }
@@ -170,7 +180,7 @@ namespace UniForm.Repository
                     return new ApiResponse<User>
                     {
                         Data = null,
-                        Succes = false,
+                        IsSuccessful = false,
                         Message = "Hata oluştu."
                     };
                 }
@@ -182,7 +192,7 @@ namespace UniForm.Repository
                     return new ApiResponse<User>
                     {
                         Data = null,
-                        Succes = false,
+                        IsSuccessful = false,
                         Message = "Bu kullanıcı bulunmaktadır."
                     };
                 }
@@ -206,7 +216,7 @@ namespace UniForm.Repository
                 return new ApiResponse<User>
                 {
                     Data = userRow,
-                    Succes = true,
+                    IsSuccessful = true,
                     Message = "Başarılı işlem."
                 };
             }
@@ -216,7 +226,7 @@ namespace UniForm.Repository
                 return new ApiResponse<User>
                 {
                     Data = null,
-                    Succes = false,
+                    IsSuccessful = false,
                     Message = $"Error: {ex.Message}"
                 };
             }
@@ -234,7 +244,7 @@ namespace UniForm.Repository
                     return new ApiResponse<User>
                     {
                         Data = null,
-                        Succes = false,
+                        IsSuccessful = false,
                     };
                 }
 
@@ -250,7 +260,7 @@ namespace UniForm.Repository
                 return new ApiResponse<User>
                 {
                     Data = existingUser,
-                    Succes = true,
+                    IsSuccessful = true,
                 };
             }
             catch (Exception ex)
@@ -258,7 +268,7 @@ namespace UniForm.Repository
                 return new ApiResponse<User>
                 {
                     Data = null,
-                    Succes = false,
+                    IsSuccessful = false,
                     Message = $"Error: {ex.Message}"
                 };
             }

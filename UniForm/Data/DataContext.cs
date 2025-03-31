@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using UniForm.Entity;
 using UniForm.Models;
 
 namespace UniForm.Data
@@ -7,13 +6,13 @@ namespace UniForm.Data
     public class DataContext : DbContext {
         
         public DataContext(DbContextOptions<DataContext> options) : base(options) {
-
         }
 
         public DbSet<Models.Action> Actions { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Post> Posts { get; set; }
+        public DbSet<Tokens> Tokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,6 +27,8 @@ namespace UniForm.Data
             .HasKey(u => u.Id);
             modelBuilder.Entity<Post>()
             .HasKey(u => u.Id);
+            modelBuilder.Entity<Tokens>()
+            .HasKey(u => u.RecordId);
         }
     }
 }

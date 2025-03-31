@@ -1,7 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-
-namespace UniForm.Entity
+﻿namespace UniForm.Entity
 {
     public class UserDto {
         public int Id { get; set; }
@@ -15,5 +12,6 @@ namespace UniForm.Entity
         public DateTime CreateDate { get; set; }
 
         public char RecordStatus { get; set; }
+        public string AccessToken { get; set; }
     }
 }
