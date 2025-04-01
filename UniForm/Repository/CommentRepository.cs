@@ -12,11 +12,22 @@ namespace UniForm.Repository {
             _context = context;
         }
 
-        public async Task<List<Comment>> GetCommentsByPostId(int postId) {
-            return await _context.Comments
-                .Where(x => x.PostId == postId)
-                .ToListAsync();
+        public async Task<List<Comment>> GetCommentsByPostId(int postId)
+        {
+            try
+            {
+                return await _context.Comments
+                    .Where(x => x.PostId == postId)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                // Hata loglama işlemi (log servisin varsa burada kullanabilirsin)
+                Console.WriteLine($"Hata oluştu: {ex.Message}");
+                return new List<Comment>();
+            }
         }
+
 
         public async Task<Comment?> SetComment(Comment comment) {
             var commentRow = new Comment {

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure.Core;
+using Microsoft.EntityFrameworkCore;
 using UniForm.Data;
 using UniForm.Entity;
 using UniForm.Interfaces;
@@ -20,7 +21,7 @@ namespace UniForm.Repository
             _tokenRepository = tokenRepository ?? throw new ArgumentNullException(nameof(tokenRepository));
         }
 
-        public async Task<ApiResponse<UserDto>> GetUserById(int userId)
+        public async Task<ApiResponse<User>> GetUserById(int userId)
         {
             try
             {
@@ -30,35 +31,25 @@ namespace UniForm.Repository
                 if (user == null)
                 {
                     _logger.LogWarning("Kullanıcı bulunamadı. UserId: {UserId}", userId);
-                    return new ApiResponse<UserDto>
+                    return new ApiResponse<User>
                     {
                         Data = null,
                         IsSuccessful = false,
                     };
                 }
 
-                var response = new UserDto
-                {
-                    Id = user.Id,
-                    Name = user.Name,
-                    Email = user.Email,
-                    CreateDate = user.CreateDate,
-                    RecordStatus = user.RecordStatus,
-                    UpdateDate = user.UpdateDate
-                };
-
                 _logger.LogInformation("Kullanıcı başarıyla getirildi. UserId: {UserId}", userId);
 
-                return new ApiResponse<UserDto>
+                return new ApiResponse<User>
                 {
-                    Data = response,
+                    Data = user,
                     IsSuccessful = true,
                 };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Kullanıcı getirilirken hata oluştu. UserId: {UserId}", userId);
-                return new ApiResponse<UserDto>
+                return new ApiResponse<User>
                 {
                     Data = null,
                     IsSuccessful = false,
@@ -67,7 +58,7 @@ namespace UniForm.Repository
             }
         }
 
-        public async Task<ApiResponse<UserDto>> GetUserForLogin(UserInfo userInfo)
+        public async Task<ApiResponse<User>> GetUserForLogin(UserInfo userInfo)
         {
             try
             {
@@ -77,7 +68,7 @@ namespace UniForm.Repository
                 if (user == null)
                 {
                     _logger.LogWarning("Giriş başarısız. Kullanıcı bulunamadı. Email: {Email}", userInfo.Mail);
-                    return new ApiResponse<UserDto>
+                    return new ApiResponse<User>
                     {
                         Data = null,
                         IsSuccessful = false,
@@ -85,35 +76,28 @@ namespace UniForm.Repository
                 }
 
                 var token = await _tokenRepository.CreateTokenAsync(user.Id);
-                
+
                 if (token == null || string.IsNullOrEmpty(token.Data))
                 {
                     throw new Exception("Could not create a valid token.");
                 }
 
-                var userDto = new UserDto
-                {
-                    Id = user.Id,
-                    Name = user.Name,
-                    Email = user.Email,
-                    CreateDate = user.CreateDate,
-                    RecordStatus = user.RecordStatus,
-                    UpdateDate = user.UpdateDate,
-                    AccessToken = token.Data
-                };
+                user.AccessToken = token.Data;
+                _context.Users.Update(user); // Kullanıcı nesnesini güncelle
+                await _context.SaveChangesAsync(); // Değişiklikleri veritabanına kaydet
 
                 _logger.LogInformation("Kullanıcı giriş yaptı. UserId: {UserId}, Email: {Email}", user.Id, user.Email);
 
-                return new ApiResponse<UserDto>
+                return new ApiResponse<User>
                 {
-                    Data = userDto,
+                    Data = user,
                     IsSuccessful = true,
                 };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Kullanıcı giriş işlemi sırasında hata oluştu. Email: {Email}", userInfo.Mail);
-                return new ApiResponse<UserDto>
+                return new ApiResponse<User>
                 {
                     Data = null,
                     IsSuccessful = false,
@@ -121,6 +105,7 @@ namespace UniForm.Repository
                 };
             }
         }
+
 
         public async Task<ApiResponse<User>> GetUserByEmail(string email)
         {
@@ -139,22 +124,11 @@ namespace UniForm.Repository
                     };
                 }
 
-                var userInfo = new User
-                {
-                    Id = user.Id,
-                    Name = user.Name,
-                    Email = user.Email,
-                    Password = user.Password,
-                    CreateDate = user.CreateDate,
-                    RecordStatus = user.RecordStatus,
-                    UpdateDate = user.UpdateDate
-                };
-
                 _logger.LogInformation("Kullanıcı başarıyla getirildi. UserId: {UserId}, Email: {Email}", user.Id, user.Email);
 
                 return new ApiResponse<User>
                 {
-                    Data = userInfo,
+                    Data = user,
                     IsSuccessful = true,
                 };
             }
@@ -231,7 +205,6 @@ namespace UniForm.Repository
                 };
             }
         }
-
 
         public async Task<ApiResponse<User>> UpdatePassByUser(User user)
         {

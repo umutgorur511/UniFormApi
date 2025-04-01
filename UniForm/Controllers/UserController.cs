@@ -18,7 +18,7 @@ namespace UniForm.Controllers
         }
         
         [HttpGet("GetUserById")]
-        public async Task<ActionResult<ApiResponse<UserDto>>> GetUserById(int userId)
+        public async Task<ActionResult<ApiResponse<User>>> GetUserById(int userId)
         {
             return Ok(await _userRepository.GetUserById(userId));        
         }
@@ -30,7 +30,7 @@ namespace UniForm.Controllers
         }
 
         [HttpPost("GetUserForLogin")]
-        public async Task<ActionResult<ApiResponse<UserDto?>>> GetUserForLogin(UserInfo userInfo)
+        public async Task<ActionResult<ApiResponse<User>>> GetUserForLogin(UserInfo userInfo)
         {
             return Ok(await _userRepository.GetUserForLogin(userInfo));
         }

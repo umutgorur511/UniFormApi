@@ -25,5 +25,9 @@ namespace UniForm.Models
 
         [Column("RECORD_STATUS")]
         public char RecordStatus { get; set; }
+
+        [Column("ACCES_TOKEN")]
+        public string ?AccessToken { get; set; }
+
     }
 }

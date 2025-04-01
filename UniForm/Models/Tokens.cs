@@ -15,7 +15,7 @@ namespace UniForm.Models
         [Column("UserId")]
         public int UserId { get; set; }
 
-        [Column("CreateDate")]
-        public DateTime CreateDate { get; set; }
+        [Column("LastLoginDate")]
+        public DateTime LastLoginDate { get; set; }
     }
 }

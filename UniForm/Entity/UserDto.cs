@@ -10,7 +10,6 @@
         public DateTime UpdateDate { get; set; }
 
         public DateTime CreateDate { get; set; }
-
         public char RecordStatus { get; set; }
         public string AccessToken { get; set; }
     }

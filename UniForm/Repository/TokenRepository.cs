@@ -25,7 +25,7 @@ namespace UniForm.Repository
 
                 if (tokenObject != null && !string.IsNullOrEmpty(tokenObject.Token)) //TokenObject.CreateDate kontrolü
                 {
-                    var elapsedMinutes = (DateTime.UtcNow - tokenObject.CreateDate).TotalMinutes;
+                    var elapsedMinutes = (DateTime.UtcNow - tokenObject.LastLoginDate).TotalMinutes;
                     if (elapsedMinutes <= 15)
                     {
                         return new ApiResponse<bool>
@@ -57,7 +57,7 @@ namespace UniForm.Repository
             await _context.AddAsync(new Tokens
             {
                 Token = uniqueToken,
-                CreateDate = DateTime.UtcNow,
+                LastLoginDate = DateTime.UtcNow,
                 UserId = userId
             });
 
